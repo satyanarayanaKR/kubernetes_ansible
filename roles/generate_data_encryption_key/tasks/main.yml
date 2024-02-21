@@ -1,0 +1,25 @@
+- name: Create the TLS Bootstrap Token
+  command: bash -c "head -c 16 /dev/urandom | od -An -t x | tr -d ' '"
+  register: command_output
+
+- set_fact:
+   bootstrap_token: "{{ command_output.stdout }}"
+
+- name: Copying encryptionkey token file
+  template:
+    src: encryption-config.yaml
+    dest: "{{ PKI_DIR }}"
+
+- name: Copying token.csv token file
+  template: 
+    src: token.csv 
+    dest: "{{ PKI_DIR }}"
+
+
+
+- name: Copy token.csv files to /var/lib/kubernetes/
+  command: bash -c 'cp token.csv  /var/lib/kubernetes'
+  args:
+    chdir: "{{ PKI_DIR }}"
+
+

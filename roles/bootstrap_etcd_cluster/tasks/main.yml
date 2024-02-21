@@ -1,0 +1,40 @@
+- name: Download ETCD and Extract ETCD
+  unarchive:
+    src: https://github.com/coreos/etcd/releases/download/{{ ectd_version }}/etcd-{{ ectd_version }}-linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+    validate_certs: no
+
+- name: Move ETCD executables to /usr/local/bin
+  command: bash -c 'mv /tmp/etcd-{{ ectd_version }}-linux-amd64/etcd* /usr/local/bin'
+
+- name: Creates /etc/etcd
+  file:
+   path: /etc/etcd
+   state: directory
+
+- name: Creates /var/lib/etcd
+  file:
+   path: /var/lib/etcd
+   state: directory
+
+- name: Copy .pem files to /etc/etcd
+  command: bash -c 'cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/'
+  args:
+    chdir: /vagrant
+
+- name: Copying ETCD service file
+  template:
+    src: etcd.service
+    dest: /etc/systemd/system/
+
+- name: Starts ETCD Service
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: etcd
+
+
+
+

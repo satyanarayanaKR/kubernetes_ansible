@@ -1,0 +1,137 @@
+---
+- name: Download CFSSL tool
+  get_url:
+    url: https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+    validate_certs: no
+    dest: /usr/local/bin/cfssl
+
+- name: Download CFSSL JSON tool
+  get_url:
+    url: https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 
+    validate_certs: no
+    dest: /usr/local/bin/cfssljson
+
+- name: Copy CA configuration file
+  copy: 
+    src: ca-config.json 
+    dest: /tmp/ 
+
+- name: Copy CA certificate signing request 
+  copy: 
+    src: ca-csr.json 
+    dest: /tmp/ 
+
+- name: ansible create directory example
+  file:
+    path: "{{ PKI_DIR }}"
+    state: directory
+  tags: dc
+
+- name: Generate a CA certificate and private key 
+  command: bash -c 'cfssl gencert -initca /tmp/ca-csr.json | cfssljson -bare ca '
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/ca-key.pem"
+  tags: dc
+
+- name: Copy the admin client certificate signing request 
+  copy: 
+    src: admin-csr.json 
+    dest: /tmp/ 
+
+- name: Generate the admin client certificate and private key 
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/admin-csr.json | cfssljson -bare admin'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/admin-key.pem" 
+
+- name: Copy the kube-proxy client certificate signing request 
+  copy: 
+    src: kube-proxy-csr.json 
+    dest: /tmp/ 
+
+- name: Generate the kube-proxy client certificate and private key 
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/kube-proxy-csr.json | cfssljson -bare kube-proxy'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/kube-proxy-key.pem"
+
+
+- name: Copy the kube-scheduler client certificate signing request
+  copy:
+    src: kube-controller-manager-csr.json
+    dest: /tmp/
+
+- name: Generate the kube-controller-manager client certificate and private key
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/kube-controller-manager-key.pem"
+
+- name: Copy the kube-scheduler client certificate signing request
+  copy:
+    src: kube-scheduler-csr.json
+    dest: /tmp/
+
+
+- name: Generate the kube-scheduler client certificate and private key
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/kube-scheduler-csr.json | cfssljson -bare kube-scheduler'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/kube-scheduler-key.pem"
+
+
+
+- name: Copy the Kubernetes server certificate signing request 
+  copy: 
+    src: kubernetes-csr.json 
+    dest: /tmp/ 
+  tags: cf
+
+- name: Generate the Kubernetes certificate and private key 
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -hostname={{k8s_master1_ip}},{{k8s_master2_ip}},{{k8s_master3_ip}},{{k8s_loadbalancer_ip}} -profile=kubernetes /tmp/kubernetes-csr.json | cfssljson -bare kubernetes'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/kubernetes-key.pem"
+  tags: cf
+
+- name: Copy the service-account certificate signing request
+  copy:
+    src: service-account-csr.json
+    dest: /tmp/
+  tags: cf
+
+- name: Generate the  service-account client certificate and private key
+  command: bash -c 'cfssl gencert -ca=/vagrant/ca.pem -ca-key=/vagrant/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/service-account-csr.json | cfssljson -bare service-account'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates:  "{{ PKI_DIR }}/service-account-key.pem"
+
+- name: Deploy kubelet JSON
+  template:
+    src: "kubelete-templates.j2"
+    dest: "/tmp/{{ item }}.json"
+  loop:
+     - "{{ k8s_worker1 }}"
+     - "{{ k8s_worker2 }}"
+     - "{{ k8s_worker3 }}"
+  tags: kcert
+
+- name: Generate the  service-account client certificate and private key
+  command: bash -c 'cfssl gencert -ca={{ PKI_DIR }}/ca.pem -ca-key={{ PKI_DIR }}/ca-key.pem -config=/tmp/ca-config.json -profile=kubernetes /tmp/{{ item }}.json | cfssljson -bare {{ item }}'
+  args:
+    chdir:  "{{ PKI_DIR }}"
+    creates: " {{ PKI_DIR }}/{{ item }}-key.pem"
+  loop:
+     - "{{ k8s_worker1 }}"
+     - "{{ k8s_worker2 }}"
+     - "{{ k8s_worker3 }}"
+  tags: kcert
+
+
+
+
+
+
+
+

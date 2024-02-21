@@ -1,0 +1,31 @@
+k8s_version: v1.12.0
+ectd_version: v3.1.4
+k8s_master1: k8s-master1
+k8s_master2: k8s-master2
+k8s_master3: k8s-master3
+
+k8s_worker1: k8s-worker1
+k8s_worker2: k8s-worker2
+k8s_worker3: k8s-worker3
+
+k8s_loadbalancer_ip: 
+k8s_master1_ip: 
+k8s_master2_ip: 
+k8s_master3_ip: 
+k8s_worker1_ip: 
+k8s_worker2_ip: 
+k8s_worker3_ip: 
+
+
+CLUSETER_IP: 
+
+APISERVER_SERVICE_IP:  
+
+PKI_DIR: '{{ playbook_dir }}/vagrant'
+
+CONF_DIR: '{{ playbook_dir }}/kubeconfig'
+
+BIN_DIR: '{{ playbook_dir }}/bin'
+
+
+

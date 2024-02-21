@@ -1,0 +1,7 @@
+- name: Download and Install kubectl
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{k8s_version}}/bin/linux/amd64/kubectl"
+    validate_certs: no
+    dest: /usr/local/bin/kubectl
+
+

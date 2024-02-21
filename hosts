@@ -1,0 +1,16 @@
+
+
+[loadbalancer]
+ 
+
+[k8s_masters]
+
+
+
+[k8s_workers]
+
+
+[all_nodes]
+
+
+
