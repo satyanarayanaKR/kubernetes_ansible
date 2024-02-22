@@ -1,6 +1,4 @@
 ---
-# tasks file for k8s_workers--n
-
 - name: Creates /var/run/kubernetes
   file: path=/var/run/{{item}} state=directory
   with_items:
@@ -16,7 +14,7 @@
 - name: Copy kubernet files to /var/lib/kubelet
   command: bash -c 'cp {{item}}  /var/lib/kubelet'
   args:
-    chdir: /vagrant
+    chdir: /cert
   with_items:
     - kubernetes.pem
     - kubernetes-key.pem
