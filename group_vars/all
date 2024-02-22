@@ -21,7 +21,7 @@ CLUSETER_IP:
 
 APISERVER_SERVICE_IP:  
 
-PKI_DIR: '{{ playbook_dir }}/vagrant'
+PKI_DIR: '{{ playbook_dir }}/cert'
 
 CONF_DIR: '{{ playbook_dir }}/kubeconfig'
 
