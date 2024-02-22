@@ -6,7 +6,7 @@
 - name: Copy .pem files to /var/lib/kubernetes/
   command: bash -c 'cp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem encryption-config.yaml service-account.pem  /var/lib/kubernetes/'
   args:
-    chdir: /vagrant
+    chdir: /cert
 
 - name: Copy .kubeconfig files to /var/lib/kubernetes/
   command: bash -c 'cp kube-controller-manager.kubeconfig kube-scheduler.kubeconfig /var/lib/kubernetes'
