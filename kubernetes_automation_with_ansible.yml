@@ -1,5 +1,4 @@
 ---
-
 - import_playbook: step2_configure_loadbalancer.yml
 - import_playbook: step3_install_client_tools.yml
 - import_playbook: step4_generate_certificates.yml
